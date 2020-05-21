@@ -1,0 +1,1 @@
+export const LOAD_CLASSIFY_SUCCESS = 'load_classify_success';

@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
 import { StyleSheet, Modal, TouchableHighlight, View, Image, Text, ScrollView, Dimensions, StatusBar } from 'react-native';
-
 import {Images} from './assets/images.js'
-
-export default class Gallery extends Component {
+import { connect } from 'react-redux';
+import { classifyImage, classifyListImage } from '../store/actions/'
+class Gallery extends Component {
     constructor(props) {
         super(props);
         this.state = {
             modal: false,
             imageSelected: undefined,
-            images: Images.map((image) => ({val: image, set: -1}))
+            images: Images.map((image) => ( {val: image, set: -1}))
         }
     }
 
     componentDidMount() {
+        this.props.classifyListImage(Images);
     }
 
     onClickImage(visible, image) {
-        this.setState({ modal: visible, imageSelected: image})
+        this.setState({ modal: visible, imageSelected: image});
+        this.props.classifyImage();
     }
 
     render() {
@@ -108,3 +110,5 @@ const styles = StyleSheet.create({
     paddingTop: 50
   },
 });
+
+export default connect(() => ({}), { classifyListImage, classifyImage })(Gallery);

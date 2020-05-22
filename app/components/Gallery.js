@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import { StyleSheet, Modal, TouchableHighlight, View, Image, Text, ScrollView, Dimensions, StatusBar, ActivityIndicator } from 'react-native';
+import { StyleSheet, TouchableHighlight, View, Image, Text, ScrollView, Dimensions, StatusBar, ActivityIndicator } from 'react-native';
+import { SearchBar } from 'react-native-elements';
 import { Images } from './assets/images.js'
 import { connect } from 'react-redux';
-import { compareMyImage, classifyListImage } from '../store/actions/'
+import { compareMyImage, classifyListImage, classifyAImage } from '../store/actions/'
 class Gallery extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            modal: false,
-            showFinder: false,
+            search: '',
+            showFinder: true,
             imageSelected: undefined,
             images: Images.map((image) => ( {val: image, set: 0})),
         }
@@ -33,10 +34,20 @@ class Gallery extends Component {
         this.setState({images: listImagesTransformed});
     }
 
+    updateSearch = (search) => {
+        this.setState({ search });
+    };
+
+    addNewImage = async () => {
+        const imageObject = {val: {uri: this.state.search}, set: 0};
+        this.props.classifyAImage(imageObject.val);
+        this.setState({list: this.state.images.push(imageObject)});
+    }
+    
     render() {
         const images = this.state.images.map((val, key) => (
-            <TouchableHighlight key={key} onPress={() => this.onClickImage(true, val.val)}>
-                <View style={[styles.imageWrap, val.set === 1 ? {backgroundColor:'green'} : null]}>
+            <TouchableHighlight key={key} underlayColor={'#ccc'}  activeOpacity={.5} onPress={() => this.onClickImage(true, val.val)}>
+                <View style={[styles.imageWrap, val.set === 1 ? {backgroundColor:'#00FF00'} : null]}>
                     <Image source={val.val} style={styles.image}/>
                 </View>
             </TouchableHighlight>
@@ -46,15 +57,17 @@ class Gallery extends Component {
                 <StatusBar hidden />
                 <View style={styles.boxTop}>
                     <Image source={require('../images/IBM-Watson-logo1.png')} style={styles.logo} resizeMode="contain"/>
+                    <SearchBar
+                        platform='android'
+                        value={this.state.search}
+                        onChangeText={this.updateSearch}
+                        placeholder='Type Your Image Link Here...'
+                        onSubmitEditing={this.addNewImage}
+                    />
                 </View>
-                {
-                    this.state.showFinder ? (
-                    <View style={styles.boxTop}>
-                    </View>
-                    ) : null
-                }
                 <ScrollView contentContainerStyle={styles.container}>
-                    { this.props.isLoading ? (<ActivityIndicator style={styles.spinner} size="large" color="#0000f0" />) : images }
+                    { this.props.isLoading ? (<ActivityIndicator style={styles.spinner} size="large" color="#0000f0" />) 
+                        : images }
                 </ScrollView>
             </View>
         );
@@ -64,14 +77,14 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: '#eee'
+    backgroundColor: '#fff'
   },
   imageWrap:{
     margin: 4,
     padding: 5,
     height: (Dimensions.get('window').height/4) - 12,
     width: (Dimensions.get('window').width/3) - 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#eee',
   },
   image: {
     flex: 1,
@@ -79,8 +92,8 @@ const styles = StyleSheet.create({
     width: null,
   },
   logo: {
-    marginTop: 4,
     width: (Dimensions.get('window').width/1.8),
+    height: (Dimensions.get('window').height/10),
   },
   modal: {
     flex: 1,
@@ -88,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0, 0.8)'
   },
   boxTop: {
-    height: (Dimensions.get('window').height/7.5),
+    height: (Dimensions.get('window').height/5),
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -102,6 +115,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginHorizontal: 8,
     marginTop: 25,
+    paddingHorizontal: 4
   },
   h5Preto: {
     fontSize: 26,
@@ -120,4 +134,4 @@ const mapStateToProps = ({ classifyReducer }) => {
   const { isLoading } = classifyReducer;
   return { isLoading };
 };
-export default connect(mapStateToProps, { classifyListImage, compareMyImage })(Gallery);
+export default connect(mapStateToProps, { classifyListImage, classifyAImage, compareMyImage })(Gallery);

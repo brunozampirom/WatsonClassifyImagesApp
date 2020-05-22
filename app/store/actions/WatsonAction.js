@@ -2,14 +2,14 @@ import { post } from "../../utils/http/httpController"
 import { getStore } from "../globalStore";
 import * as types from "./action-types";
 
-export const classifyImage = (url, threshold) => async (dispatch) => {
+const classifyImage = (url, threshold) => async (dispatch) => {
 
     var bodyFormData = new FormData();
     bodyFormData.append('url', url);
     bodyFormData.append('classifier_ids', 'default');
     bodyFormData.append('threshold', threshold);
     
-    post('https://gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19', bodyFormData)
+    return post('https://gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19', bodyFormData)
         .then((res) => {
             if(res && res.data && res.data.images && res.data.images[0] && res.data.images[0].classifiers[0] && res.data.images[0].classifiers[0].classes) {
                 // console.log(res.data.images[0].classifiers[0].classes);
@@ -23,12 +23,22 @@ export const classifyImage = (url, threshold) => async (dispatch) => {
         });
 }
 
-export const classifyListImage = (listImages) => (dispatch) => {
+export const classifyAImage = (image) => (dispatch) => {
     dispatch({type: types.ON_LOAD, load: true});
-    listImages.forEach(imageUrl => {
+    dispatch(classifyImage(image.uri, 0.6)).then( () =>
+        (dispatch({type: types.ON_LOAD, load: false}))
+    );
+}
+
+const goList = (list) => async (dispatch) => {
+    return list.forEach(imageUrl => {
         dispatch(classifyImage(imageUrl.uri, 0.6));
     });
-    dispatch({type: types.ON_LOAD, load: false});
+}
+
+export const classifyListImage = (listImages) => (dispatch) => {
+    dispatch({type: types.ON_LOAD, load: true});
+    dispatch(goList(listImages)).then(() => (dispatch({type: types.ON_LOAD, load: false})));
 }
 
 export const compareMyImage = (selectedImage) => async (dispatch) => {

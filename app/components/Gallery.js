@@ -10,8 +10,6 @@ class Gallery extends Component {
         this.state = {
             search: '',
             showFinder: true,
-            imageSelected: undefined,
-            images: Images.map((image) => ( {val: image, set: 0})),
         }
     }
 
@@ -19,19 +17,8 @@ class Gallery extends Component {
         this.props.classifyListImage(Images);
     }
 
-    async onClickImage(visible, image) {
-        // this.setState({ modal: visible, imageSelected: image});
-        const similarList = await this.props.compareMyImage(image);
-        const listImages = this.state.images;
-        const listImagesTransformed = listImages.map(img => {
-            if(similarList.find(imgsimilarList => (imgsimilarList.image === img.val.uri))) {
-                return ({val:img.val , set:1});
-            }
-            else {
-                return ({val:img.val , set:0});
-            }
-        })
-        this.setState({images: listImagesTransformed});
+    async onClickImage(image) {
+        this.props.compareMyImage(image);
     }
 
     updateSearch = (search) => {
@@ -39,16 +26,15 @@ class Gallery extends Component {
     };
 
     addNewImage = async () => {
-        const imageObject = {val: {uri: this.state.search}, set: 0};
-        this.props.classifyAImage(imageObject.val);
-        this.setState({list: this.state.images.push(imageObject)});
+        this.props.classifyAImage({url: this.state.search});
+        this.setState({search: ''})
     }
     
     render() {
-        const images = this.state.images.map((val, key) => (
-            <TouchableHighlight key={key} underlayColor={'#ccc'}  activeOpacity={.5} onPress={() => this.onClickImage(true, val.val)}>
-                <View style={[styles.imageWrap, val.set === 1 ? {backgroundColor:'#00FF00'} : null]}>
-                    <Image source={val.val} style={styles.image}/>
+        const images = this.props.imagesList.map((img, key) => (
+            <TouchableHighlight key={key} underlayColor={'#ccc'}  activeOpacity={.5} onPress={() => this.onClickImage(img)}>
+                <View style={[styles.imageWrap, img.set === 1 ? {backgroundColor:'#00FF00'} : null]}>
+                    <Image source={{ uri: img.url }} style={styles.image}/>
                 </View>
             </TouchableHighlight>
         ))
@@ -131,7 +117,7 @@ const styles = StyleSheet.create({
   }
 });
 const mapStateToProps = ({ classifyReducer }) => {
-  const { isLoading } = classifyReducer;
-  return { isLoading };
+  const { isLoading, imagesList } = classifyReducer;
+  return { isLoading, imagesList };
 };
 export default connect(mapStateToProps, { classifyListImage, classifyAImage, compareMyImage })(Gallery);

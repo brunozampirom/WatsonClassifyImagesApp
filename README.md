@@ -9,3 +9,11 @@ Para a comunicação com API utilizada para classificação das imagens, foi uti
 
 ## Funcionamento
 A aplicação inicialmente realiza a classificação de alguns imagens pré listadas, após esse carregamento, já é possível utilizar o aplicativo, que consiste em: Após o clique do usuário em uma das imagens, o aplicativo marcará em verde todas imagens, que atráves da classificação realizada anteriormente, são semelhantes.
+
+## Rodando o App
+```
+git clone https://github.com/Bruno-Zamp/WatsonClassifyImagesApp.git
+cd WatsonClassifyImagesApp
+npm i
+expo start
+```
